@@ -1,4 +1,4 @@
-name: PHP Composer
+name: PHP Check
 
 on:
   push:
@@ -8,29 +8,21 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4  # 更新 checkout 到最新稳定版
 
-    - name: Validate composer.json and composer.lock
-      run: composer validate --strict
+    # 移除 Composer 验证步骤（因项目无 composer.json）
+    # 移除 Composer 缓存步骤（无需缓存依赖）
+    # 移除 Composer 安装步骤（无依赖需安装）
 
-    - name: Cache Composer packages
-      id: composer-cache
-      uses: actions/cache@v3  # 已更新为v3版本
+    # 可根据实际需求添加 PHP 相关检查步骤，例如语法检查
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
       with:
-        path: vendor
-        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-php-
+        php-version: '7.4'  # 根据项目支持的 PHP 版本调整
+        extensions: mbstring, gd, curl  # 项目所需 PHP 扩展
 
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
-
-    # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
-    # Docs: https://getcomposer.org/doc/articles/scripts.md
-
-    # - name: Run test suite
-    #   run: composer run-script test
+    - name: Check PHP syntax
+      run: find . -name "*.php" -exec php -l {} \;  # 检查所有 PHP 文件的语法合法性
